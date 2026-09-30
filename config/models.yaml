@@ -1,0 +1,65 @@
+# ============================================================================
+# ctf_agent_kit 模型配置
+#
+# 说明：本项目通过此配置统一管理模型选型与路由。
+# 后续更换更新/更强的模型时，只需修改本文件（models 段与 routing 段），
+# 业务代码零改动 —— 所有代码均通过 models/router.py 按角色名取模型。
+#
+# API key 一律从环境变量读取（见每个模型的 api_key_env），禁止硬编码。
+# ============================================================================
+
+models:
+  # 深度推理模型：漏洞利用链推理、复杂数学/密码推导
+  deep_reasoner:
+    model: deepseek-r1
+    provider: deepseek
+    api_base: https://api.deepseek.com/v1
+    api_key_env: DEEPSEEK_API_KEY
+    max_tokens: 8192
+    temperature: 0.2
+    capabilities: [deep_reasoning, exploit_chain, crypto_math]
+
+  # 通用生成模型：writeup 摘要、笔记压缩、文档生成
+  general_generator:
+    model: qwen2.5-72b
+    provider: qwen
+    api_base: https://dashscope.aliyuncs.com/compatible-mode/v1
+    api_key_env: QWEN_API_KEY
+    max_tokens: 8192
+    temperature: 0.5
+    capabilities: [summarization, writeup, general]
+
+  # 旗舰最大模型：长链规划、复杂任务兜底（降级链终点）
+  flagship:
+    model: deepseek-v4-flash
+    provider: deepseek
+    api_base: https://api.deepseek.com/v1
+    api_key_env: DEEPSEEK_API_KEY
+    max_tokens: 16384
+    temperature: 0.3
+    capabilities: [long_chain_planning, fallback, complex_task]
+
+# 角色 → 模型路由规则
+# 每个角色声明首选模型与降级链（fallback_chain 按序尝试）
+routing:
+  planner:            # Planner：全局规划、长链任务分解
+    primary: flagship
+    fallback_chain: [deep_reasoner]
+  executor:           # Executor：子任务执行、工具调用
+    primary: deep_reasoner
+    fallback_chain: [flagship]
+  auto_prompter:      # AutoPrompter：任务指令精化
+    primary: general_generator
+    fallback_chain: [flagship]
+  validator:          # Validator：独立复核疑似 flag/漏洞
+    primary: deep_reasoner
+    fallback_chain: [flagship]
+  summarizer:         # LM 摘要（笔记压缩、长输出压缩）
+    primary: general_generator
+    fallback_chain: [flagship]
+  classifier:         # 题型分类/复盘等学习模块（轻量任务）
+    primary: general_generator
+    fallback_chain: [flagship]
+
+# 全局降级策略：某角色所有候选模型失败时，最终兜底
+global_fallback: flagship
