@@ -1,0 +1,13 @@
+{
+  "id": "example_caesar",
+  "category": "crypto",
+  "title": "凯撒的秘密",
+  "description": "附件 ciphertext.txt 中的文本经过凯撒移位加密，移位数不超过 25。解出明文中的 flag。",
+  "flag_patterns": ["flag\\{[^}]+\\}"],
+  "flag": "flag{c4es4r_1s_we4k}",
+  "start_script": "start.sh",
+  "ports": [],
+  "timeout_seconds": 600,
+  "difficulty": "easy",
+  "knowledge_points": ["凯撒密码", "爆破枚举", "词频分析"]
+}

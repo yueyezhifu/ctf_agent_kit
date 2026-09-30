@@ -1,0 +1,34 @@
+# ctf_agent_kit 题目沙箱模板
+# 变量由 sandbox/manager.py 的 string.Template 渲染：
+#   $challenge_id  题目ID   $category  题型类别
+#   $ports         端口映射块 $timeout_seconds 超时
+services:
+  challenge:
+    build: .
+    container_name: ctf_${challenge_id}
+    restart: "no"
+    ports:
+$ports
+    environment:
+      - CTF_CATEGORY=$category
+      - CTF_TIMEOUT=$timeout_seconds
+    # 安全隔离基线：只读根fs + 降权 + 资源限额（按题目需要再放开）
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    networks:
+      - sandbox_net
+
+networks:
+  sandbox_net:
+    driver: bridge
+    internal: false   # 需要外网下载依赖的题改为 true 并加白名单代理
