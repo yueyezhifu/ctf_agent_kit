@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+
+# 评测与运行时产物
+*.jsonl
+!bench/fixtures/*.jsonl
+.replay/
+reports/
+*.log
+
+# 沙箱
+**/challenges/*/attachments_tmp/
+.docker/
+
+# 密钥（任何疑似密钥文件都不入库）
+.env
+*.pem.key
+secrets/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
